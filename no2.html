@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Reg</title>
+    <style>
+        table,td,th {
+            border: 1px solid rgb(255, 95, 95);
+            border-collapse: collapse;
+            padding: 12px; 
+            margin: 0 auto;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h1>Madding</h1>
+        Usename : <input type="text" id="username" placeholder="masukkan nama"><br><br>
+        Password:  <input type="password" id="password" placeholder="masukkan password"> 
+        <br><br>
+        <button onclick="login()">Login</button><br><br>
+    </center>
+    <table id='productlist'>
+        <thead>
+            <tr>
+                <th>No.</th>
+                <th>Kegiatan</th>
+                <th>Hari</th>
+                <th>Poster</th>
+                <th>Act</th>
+            </tr>
+        </thead>
+    </table>
+    <center>
+    <p id='isi'></p>
+    <p id='buttonlogout'></p>
+    </center>
+</body>
+<script>
+class User{
+    constructor(username,password,role){
+        this.username=username,
+        this.password=password,
+        this.role=role
+    }
+}
+var datauser=[
+    new User('admin','12','admin'),
+    new User('haura','11','user')
+]
+class Product{
+    constructor(name,hari,poster){
+            this.name=name,
+            this.hari=hari,
+            this.poster=poster
+        }
+    }
+var dataproduct=[
+    new Product ('lari','senin','https://www.femina.co.id/images/images/PERSIAPAN%20LARI.jpg'),
+    new Product ('estafet', 'selasa','https://www.parkgrandpaddingtoncourt.co.uk/blog/wp-content/uploads/2017/10/Shopping.jpg'),
+]
+
+userlogin=[]
+
+const login=()=>{
+    var username=document.getElementById('username').value
+    var password=document.getElementById('password').value
+    if(userlogin.length!==0){
+        alert('ada sudah login mohon logout dahulu')
+    }else if (username&&password){
+        var cekdata=datauser.filter((val)=>val.username==username&&val.password==password)
+            if(cekdata.length===1){
+                userlogin=cekdata[0]
+                document.getElementById('isi').innerHTML=
+                    `<h2>${userlogin.username}<h2>`
+                emptyform()
+            }else{
+                    document.getElementById('isi').innerHTML='<h2>Password salah<h2>'
+            }
+    }else{
+        document.getElementById('isi').innerHTML='<h2>Masukkan password atau username<h2>'
+    }
+    printtabel()
+}
+const logout=()=>{
+    userlogin=[]
+    document.getElementById('isi').innerHTML=''
+    document.getElementById('buttonlogout').innerHTML=''
+    emptyform()
+    document.getElementById("productlist").innerHTML= `<thead>
+                                                                <tr>
+                                                                    <th>No.</th>
+                                                                    <th>Kegiatan</th>
+                                                                    <th>Hari</th>
+                                                                    <th>Poster</th>
+                                                                    <th>Act</th>
+                                                                </tr>
+                                                            </thead>`
+}
+
+const emptyform=()=>{
+    document.getElementById('username').value=''
+    document.getElementById('password').value=''
+    document.getElementById("productlist").innerHTML=''
+}
+
+var indexdelete=-1
+var indexedit=-1
+
+const printtabel=()=>{
+    if(userlogin.length!==0){
+        if(userlogin.role=='user'){
+        var output=''
+        output+=`   <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Kegiatan</th>
+                            <th>Hari</th>
+                            <th>Poster</th>
+                            <th>Act</th>
+                        </tr>
+                    </thead>`
+        var data=dataproduct.map((val,index)=>{
+         return(  `<tbody>
+                    <tr>
+                        <td>${index+1}</td>
+                        <td>${val.name}</td>
+                        <td>${val.hari}</td>
+                        <td><img src=${val.poster} alt=${index} height='150px' width='200px'></td>
+                        <td></td>
+                    </tr>
+                    </tbody>`)
+            })
+        document.getElementById("productlist").innerHTML=`${output} ${data.join('')}`
+        document.getElementById('buttonlogout').innerHTML=`<button onclick="logout()">Logout</button>`
+        }
+        else if(userlogin.role=='admin'){
+        var output=''
+        var tfoot=''
+        output+=`   <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Kegiatan</th>
+                            <th>Hari</th>
+                            <th>Poster</th>
+                            <th>Act</th>
+                        </tr>
+                    </thead>`
+        var data=dataproduct.map((val,index)=>{
+            if(index==indexdelete){
+                return(  `<tbody>
+                            <tr>
+                                <td>${index+1}</td>
+                                <td>${val.name}</td>
+                                <td>${val.hari}</td>
+                                <td><img src=${val.poster} alt=${val.name} height='150px' width='200px'></td>
+                                <td>
+                                    <button onclick="acceptdelete(${index})">Yes</button>
+                                    <button onclick="canceldelete()">No</button>
+                                </td>
+                            </tr>
+                            </tbody>`)
+            }else if(index==indexedit){
+                return(  `   <tr>
+                            <td>${index+1}</td>
+                            <td><input type="text" id='editnama' value=${dataproduct[indexedit].name}></td>
+                            <td>
+                                <select id="edithari">
+                                    <option hidden value="">${val.hari}</option>
+                                    <option value="senin">senin</option>
+                                    <option value="selasa">selasa</option>
+                                    <option value="rabu">rabu</option>
+                                    <option value="kamis">kamis</option>
+                                    <option value="jumat">jumat</option>
+                                    <option value="sabtu">sabtu</option>
+                                    <option value="minggu">minggu</option>
+                                    </select>
+                                    </td>
+                            <td><input type="text" id='editimage' value=${dataproduct[indexedit].poster}></td>
+                            <td>
+                                <button onclick="cancelupdatedata()">Cancel</button>
+                                <button onclick="updatedata(${index})">Save</button>
+                        </tr>`)
+            }else{
+                return(  `<tbody>
+                            <tr>
+                                <td>${index+1}</td>
+                                <td>${val.name}</td>
+                                <td>${val.hari}</td>
+                                <td><img src=${val.poster} alt=${index} height='150px' width='200px'></td>
+                                <td>
+                                    <button onclick="deleteproduk(${index})">delete</button>
+                                    <button onclick="editproduk(${index})">edit</button>
+                                </td>
+                            </tr>
+                            </tbody>`)  
+            }
+            })
+        tfoot+=`<tfoot>
+                    <tr>
+                        <td></td>
+                        <td><input type="text" id="name" placeholder="nama kegiatan"></td>
+                        <td>
+                            <select id="hari">
+                                <option hidden value="">pilih hari...</option>
+                                    <option value="senin">senin</option>
+                                    <option value="selasa">selasa</option>
+                                    <option value="rabu">rabu</option>
+                                    <option value="kamis">kamis</option>
+                                    <option value="jumat">jumat</option>
+                                    <option value="sabtu">sabtu</option>
+                                    <option value="minggu">minggu</option>
+                            </select>
+                        </td>
+                        <td><input type="text" id="image" placeholder="poster"></td>
+                    <td><button onclick="inputdataonClick()">Add To do</button></td>
+                    </tr>
+                </tfoot>`
+        document.getElementById("productlist").innerHTML=`${output} ${data.join('')} ${tfoot}`
+        document.getElementById('buttonlogout').innerHTML=`<button onclick="logout()">Logout</button>`
+        }
+    }
+}
+
+const inputdataonClick=()=>{
+    var addname=document.getElementById('name').value
+    var addhari=document.getElementById('hari').value
+    var addimage=document.getElementById('image').value
+    if(addname==""||addhari==""||addimage==""){
+        alert('coba input semua dulu')
+    }
+    else {
+        dataproduct.push(new Product (addname,addhari,addimage))
+    }
+    printtabel()
+}
+
+const editproduk=(indexed)=>{
+    indexedit=indexed
+    printtabel()
+}
+
+const updatedata=(indexed)=>{
+var newname=document.getElementById('editnama').value
+var newhari=document.getElementById('edithari').value
+var newimage=document.getElementById('editimage').value
+    if(newname===''){       //kalo nama ga diupdate
+        newname=dataproduct[indexed].name        //maka tetep pake nama yang lama
+    }
+    if(newimage===''){
+        newimage=dataproduct[indexed].poster
+    }
+    if(newhari===''){
+        newhari=dataproduct[indexed].hari
+    }
+    dataproduct.splice(indexed,1, new Product (newname,newhari,newimage))
+    indexedit=-1
+    printtabel()
+}
+
+const cancelupdatedata=()=>{
+    indexedit=-1
+    printtabel()
+}
+
+const deleteproduk=(indexdel)=>{
+    indexdelete=indexdel
+    printtabel()
+}
+
+const acceptdelete=(indexdel)=>{
+    dataproduct.splice(indexdel,1)
+    indexdelete=-1
+    printtabel()
+}
+
+const canceldelete=()=>{
+    indexdelete=-1
+    printtabel()
+}
+
+
+</script>
+</html>
